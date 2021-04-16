@@ -9,6 +9,7 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Planets, Characters, Favorites
+from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
 #from models import Person
 
 app = Flask(__name__)
@@ -19,6 +20,9 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+jwt = JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -40,6 +44,7 @@ def handle_hello():
     return jsonify(response_body), 200
 
 @app.route('/planets', methods=['GET'])
+@jwt_required()
 def handle_planets():
 
     all_planets = Planets.query.all()
@@ -48,12 +53,61 @@ def handle_planets():
     return jsonify(all_planets), 200
 
 @app.route('/characters', methods=['GET'])
+@jwt_required()
 def handle_characters():
     
     all_characters = Characters.query.all()
     all_characters = list(map(lambda x: x.serialize(), all_characters))
 
     return jsonify(all_characters), 200
+
+@app.route('/favorites', methods=['GET'])
+def get_favorites():
+    
+    all_favorites = Favorites.query.all()
+    all_favorites = list(map(lambda x: x.serialize(), all_favorites))
+
+    return jsonify(all_favorites), 200
+
+@app.route('/favorites', methods=['POST'])
+def create_favorites():
+    
+    response_body = {
+        "msg": "Hello, this is your POST /favorites response "
+    }
+
+    return jsonify(response_body), 200
+
+@app.route('/favorites', methods=['DELETE'])
+def remove_favorites():
+    
+    response_body = {
+        "msg": "Hello, this is your DELETE /favorites response "
+    }
+
+    return jsonify(response_body), 200
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+
+    user = User.query.filter_by(username=username, password=password).first()
+
+    if user is None:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    access_token = create_access_token(identity=user.id)
+    return jsonify(access_token=access_token)
+
+@app.route('/register', methods=['POST'])
+def handle_register():
+    
+    response_body = {
+        "msg": "Hello, this is your POST /register response "
+    }
+
+    return jsonify(response_body), 200
 
 
 # this only runs if `$ python src/main.py` is executed

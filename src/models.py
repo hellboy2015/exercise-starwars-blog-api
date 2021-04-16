@@ -100,22 +100,20 @@ class Favorites(db.Model):
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
-    planets_id = Column(Integer, ForeignKey('planets.id'))
-    characters_id = Column(Integer, ForeignKey('characters.id'))
-    created = Column(DateTime, nullable=False)
+    favoriteName = Column(String(250), nullable=False)
+    entityType = Column(String(250), nullable=False)
+    isFav = Column(Boolean, nullable=False)
     edited = Column(DateTime, nullable=False)
     createdBy = Column(String(250), nullable=False)
     editedBy = Column(String(250), nullable=False)
     user = relationship(User)
-    planets = relationship(Planets)
-    characters = relationship(Characters)
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "planets_id": self.planets_id,
-            "characters_id": self.characters_id,
-            "created": self.created,
+            "favoriteName": self.favoriteName,
+            "entityType": self.entityType,
+            "isFav": self.isFav,
             # do not serialize the password, its a security breach
         }
