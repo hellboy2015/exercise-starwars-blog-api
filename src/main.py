@@ -41,13 +41,20 @@ def handle_hello():
 
 @app.route('/planets', methods=['GET'])
 def handle_planets():
-    
-    planets = Planets.query.all()
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
 
-    return response_body, 200
+    all_planets = Planets.query.all()
+    all_planets = list(map(lambda x: x.serialize(), all_planets))
+
+    return jsonify(all_planets), 200
+
+@app.route('/characters', methods=['GET'])
+def handle_characters():
+    
+    all_characters = Characters.query.all()
+    all_characters = list(map(lambda x: x.serialize(), all_characters))
+
+    return jsonify(all_characters), 200
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
