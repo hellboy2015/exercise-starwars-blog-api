@@ -99,19 +99,17 @@ class Favorites(db.Model):
     # Here we define columns for the table address.
     # Notice that each column is also a normal Python instance attribute.
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    #user_id = Column(Integer, ForeignKey('user.id'))
+    favoriteID = Column(String(250), nullable=False)
     favoriteName = Column(String(250), nullable=False)
     entityType = Column(String(250), nullable=False)
     isFav = Column(Boolean, nullable=False)
-    edited = Column(DateTime, nullable=False)
-    createdBy = Column(String(250), nullable=False)
-    editedBy = Column(String(250), nullable=False)
-    user = relationship(User)
+    #user = relationship(User)
 
     def serialize(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
+            "favoriteID": self.favoriteID,
             "favoriteName": self.favoriteName,
             "entityType": self.entityType,
             "isFav": self.isFav,

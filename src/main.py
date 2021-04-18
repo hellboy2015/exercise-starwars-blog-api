@@ -18,7 +18,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 MIGRATE = Migrate(app, db)
 db.init_app(app)
-CORS(app)
+cors = CORS(app)
 setup_admin(app)
 
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
@@ -44,7 +44,7 @@ def handle_hello():
     return jsonify(response_body), 200
 
 @app.route('/planets', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def handle_planets():
 
     all_planets = Planets.query.all()
@@ -53,7 +53,7 @@ def handle_planets():
     return jsonify(all_planets), 200
 
 @app.route('/characters', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def handle_characters():
     
     all_characters = Characters.query.all()
@@ -71,12 +71,20 @@ def get_favorites():
 
 @app.route('/favorites', methods=['POST'])
 def create_favorites():
+    favoriteID = request.json.get("favoriteID", None)
+    favoriteName = request.json.get("favoriteName", None)
+    entityType = request.json.get("entityType", None)
+    isFav = request.json.get("isFav", None)
     
-    response_body = {
-        "msg": "Hello, this is your POST /favorites response "
-    }
-
-    return jsonify(response_body), 200
+    # busca usuario en BBDD
+    # user = User.query.filter_by(email=email).first()
+    
+    # crea usuario nuevo
+    # crea registro nuevo en BBDD de 
+    favorite = Favorites(favoriteName=favoriteName, entityType=entityType, isFav=isFav, favoriteID=favoriteID)
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify({"msg": "favorite created successfully"}), 200
 
 @app.route('/favorites', methods=['DELETE'])
 def remove_favorites():
@@ -102,12 +110,29 @@ def login():
 
 @app.route('/register', methods=['POST'])
 def handle_register():
-    
-    response_body = {
-        "msg": "Hello, this is your POST /register response "
-    }
+    email = request.json.get("email", None)
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
 
-    return jsonify(response_body), 200
+    if email is None:
+        return jsonify({"msg": "No email was provided"}), 400
+    if password is None:
+        return jsonify({"msg": "No password was provided"}), 400
+    if username is None:
+        return jsonify({"msg": "No username was provided"}), 400
+    
+    # busca usuario en BBDD
+    user = User.query.filter_by(email=email).first()
+    if user:
+        # the user was not found on the database
+        return jsonify({"msg": "User already exists"}), 401
+    else:
+        # crea usuario nuevo
+        # crea registro nuevo en BBDD de 
+        user1 = User(username=username, email=email, password=password, is_active=True)
+        db.session.add(user1)
+        db.session.commit()
+        return jsonify({"msg": "User created successfully"}), 200
 
 
 # this only runs if `$ python src/main.py` is executed
