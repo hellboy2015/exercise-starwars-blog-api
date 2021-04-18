@@ -75,6 +75,12 @@ def create_favorites():
     favoriteName = request.json.get("favoriteName", None)
     entityType = request.json.get("entityType", None)
     isFav = request.json.get("isFav", None)
+
+    favorite = Favorites.query.filter_by(favoriteID=favoriteID).first()
+
+    if favorite:
+        # the user was not found on the database
+        return jsonify({"msg": "favorite already exists"}), 401
     
     # busca usuario en BBDD
     # user = User.query.filter_by(email=email).first()
@@ -88,9 +94,15 @@ def create_favorites():
 
 @app.route('/favorites', methods=['DELETE'])
 def remove_favorites():
+    favorite = request.json.get("id", None)
+
+    if favorite is None:
+        raise APIException('User not found', status_code=404)
+    db.session.delete(favorite)
+    db.session.commit()
     
     response_body = {
-        "msg": "Hello, this is your DELETE /favorites response "
+        "msg": "favorite deleted successfully."
     }
 
     return jsonify(response_body), 200
