@@ -62,6 +62,7 @@ def handle_characters():
     return jsonify(all_characters), 200
 
 @app.route('/favorites', methods=['GET'])
+@jwt_required()
 def get_favorites():
     
     all_favorites = Favorites.query.all()
@@ -70,6 +71,7 @@ def get_favorites():
     return jsonify(all_favorites), 200
 
 @app.route('/favorites', methods=['POST'])
+@jwt_required()
 def create_favorites():
     favoriteID = request.json.get("favoriteID", None)
     favoriteName = request.json.get("favoriteName", None)
@@ -93,11 +95,12 @@ def create_favorites():
     return jsonify({"msg": "favorite created successfully"}), 200
 
 @app.route('/favorites', methods=['DELETE'])
+@jwt_required()
 def remove_favorites():
-    favorite = request.json.get("id", None)
-
+    idToDelete = request.json.get("idToDelete", None)
+    favorite = Favorites.query.get(idToDelete)
     if favorite is None:
-        raise APIException('User not found', status_code=404)
+        raise APIException('Favorite not found', status_code=404)
     db.session.delete(favorite)
     db.session.commit()
     
